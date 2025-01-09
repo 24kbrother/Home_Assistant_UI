@@ -1,5 +1,6 @@
 2025-1-10 02:51:41
 更新script.yaml文件，内容一键开关灯脚本
+
 使用范例：
 type: custom:button-card
 entity: sensor.all_lights_num
