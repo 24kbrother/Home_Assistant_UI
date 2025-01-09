@@ -1,0 +1,47 @@
+# scripts.yaml
+toggle_lights_unified:
+  alias: "统一灯光状态"
+  sequence:
+    - variables:
+        lights: "{{ lights }}"  # 灯列表，动态传入
+        light_states: "{{ states | selectattr('entity_id', 'in', lights) | map(attribute='state') | list }}"
+        all_on: "{{ light_states | select('equalto', 'on') | list | length == lights | length }}"
+        all_off: "{{ light_states | select('equalto', 'off') | list | length == lights | length }}"
+    
+    # 如果灯的状态不一致，统一开灯
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ not all_on and not all_off }}"  # 如果灯的状态不一致
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: "{{ lights }}"
+        
+    # 如果所有灯都已经开着，则将所有灯关闭
+        - conditions:
+            - condition: template
+              value_template: "{{ all_on }}"
+          sequence:
+            - service: light.turn_off
+              target:
+                entity_id: "{{ lights }}"
+        
+    # 如果所有灯都已经关着，则将所有灯打开
+        - conditions:
+            - condition: template
+              value_template: "{{ all_off }}"
+          sequence:
+            - service: light.turn_on
+              target:
+                entity_id: "{{ lights }}"
+
+
+#########################################################                
+toggle_climates_off:
+  alias: "一键关闭空调"
+  sequence:
+    - service: climate.turn_off
+      target:
+        entity_id: "{{ climates }}"
+    
